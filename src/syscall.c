@@ -44,6 +44,7 @@ SYSCALL_LIST_DECL(amd64)
 SYSCALL_LIST_DECL(mipso32)
 SYSCALL_LIST_DECL(mips64)
 SYSCALL_LIST_DECL(i386)
+SYSCALL_LIST_DECL(x32)
 
 const struct syscall_list syscall_lists[] = {
 #ifdef AUDIT_ARCH_ARM
