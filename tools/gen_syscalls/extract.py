@@ -19,6 +19,15 @@
 
 import re
 
+# "xrange" was renamed to "range" in Python 3
+
+try:
+    # Python 2
+    xrange
+except NameError:
+    # Python 3, xrange is now named range
+    xrange = range
+
 out_file = open('output_syscalls.c', 'w')
 
 def output(str):
