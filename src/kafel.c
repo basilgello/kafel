@@ -39,20 +39,7 @@ static int parse(struct kafel_ctxt* ctxt) {
     return -1;
   }
 
-  YY_BUFFER_STATE buf_state;
-  switch (ctxt->input.type) {
-    case INPUT_FILE:
-      buf_state =
-          kafel_yy_create_buffer(ctxt->input.file, YY_BUF_SIZE, scanner);
-      kafel_yy_switch_to_buffer(buf_state, scanner);
-      break;
-    case INPUT_STRING:
-      buf_state = kafel_yy_scan_string(ctxt->input.string, scanner);
-      break;
-    default:
-      kafel_yylex_destroy(scanner);
-      return -1;
-  }
+  kafel_yy_scan_string(ctxt->input.string, scanner);
 
   kafel_yyset_column(1, scanner);
   kafel_yyset_lineno(1, scanner);
@@ -87,13 +74,45 @@ KAFEL_API void kafel_set_input_file(kafel_ctxt_t ctxt, FILE* file) {
   ASSERT(ctxt != NULL);
   ASSERT(file != NULL);
 
+  char *filebuf = NULL;
+
+  // Free and null the string if the type was FILE
+  if (ctxt->input.string && ctxt->input.type == INPUT_FILE) {
+    char *freestr = (char*)ctxt->input.string;
+    free(freestr);
+    ctxt->input.string = NULL;
+  }
+
+  // Read YY_BUF_SIZE from file as string
+  filebuf = calloc(1, YY_BUF_SIZE);
+  if (!filebuf) {
+    append_error(ctxt, "Cannot allocate file buffer of %d bytes",
+                 YY_BUF_SIZE);
+    return;
+  }
+
+  size_t bytes_read = fread(filebuf, 1, YY_BUF_SIZE, file);
+  if(!bytes_read || ferror(file)) {
+    append_error(ctxt, "Cannot read from file: %d",
+                 ferror(file));
+    free(filebuf);
+    return;
+  }
+
   ctxt->input.type = INPUT_FILE;
-  ctxt->input.file = file;
+  ctxt->input.string = filebuf;
 }
 
 KAFEL_API void kafel_set_input_string(kafel_ctxt_t ctxt, const char* string) {
   ASSERT(ctxt != NULL);
   ASSERT(string != NULL);
+
+  // Free and null the string if the type was FILE
+  if (ctxt->input.string && ctxt->input.type == INPUT_FILE) {
+    char *freestr = (char*)ctxt->input.string;
+    free(freestr);
+    ctxt->input.string = NULL;
+  }
 
   ctxt->input.type = INPUT_STRING;
   ctxt->input.string = string;

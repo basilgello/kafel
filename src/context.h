@@ -56,10 +56,7 @@ struct kafel_ctxt {
       INPUT_FILE,
       INPUT_STRING,
     } type;
-    union {
-      FILE* file;
-      const char* string;
-    };
+    const char* string;
   } input;
   bool lexical_error;
   struct {
