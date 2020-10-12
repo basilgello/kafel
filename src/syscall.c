@@ -70,6 +70,12 @@ const struct syscall_list syscall_lists[] = {
 #endif
 };
 
+const struct syscall_list companion_syscall_lists[] = {
+#ifdef AUDIT_ARCH_X86_64
+    SYSCALL_LIST(AUDIT_ARCH_X86_64, x32),
+#endif
+};
+
 struct syscall_descriptor* syscall_custom(uint32_t nr) {
   struct syscall_descriptor* rv = calloc(1, sizeof(*rv));
   rv->nr = nr;
