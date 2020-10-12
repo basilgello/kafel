@@ -87,6 +87,17 @@ const struct syscall_list* syscalls_lookup(uint32_t arch) {
   return NULL;
 }
 
+const struct syscall_list* companion_syscalls_lookup(uint32_t arch) {
+  for (size_t i = 0;
+       i < sizeof(companion_syscall_lists) / sizeof(companion_syscall_lists[0]);
+       ++i) {
+    if (companion_syscall_lists[i].arch == arch) {
+      return &companion_syscall_lists[i];
+    }
+  }
+  return NULL;
+}
+
 const struct syscall_descriptor* syscall_lookup(const struct syscall_list* list,
                                                 const char* name) {
   ASSERT(list != NULL);

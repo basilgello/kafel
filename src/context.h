@@ -50,6 +50,7 @@ struct kafel_ctxt {
   uint32_t target_arch;
   const struct syscall_list* syscalls;
   uint32_t all_architectures[MAX_TARGET_ARCHS];
+  bool use_companion_arch;
   struct {
     enum {
       INPUT_NONE,

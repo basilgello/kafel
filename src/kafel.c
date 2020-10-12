@@ -44,12 +44,21 @@ static int parse(struct kafel_ctxt* ctxt) {
   kafel_yyset_column(1, scanner);
   kafel_yyset_lineno(1, scanner);
 
-  ctxt->syscalls = syscalls_lookup(ctxt->target_arch);
+  ctxt->syscalls = ctxt->use_companion_arch ?
+                   companion_syscalls_lookup(ctxt->target_arch) :
+                   syscalls_lookup(ctxt->target_arch);
   if (ctxt->syscalls == NULL) {
-    append_error(ctxt, "Cannot resolve syscall list for architecture %#x\n",
-                 ctxt->target_arch);
     kafel_yylex_destroy(scanner);
-    return -1;
+
+    // companion architectures may not be present,
+    // so ;et's indicate it is not there silently for end-user
+    if (ctxt->use_companion_arch) {
+      return -2;
+    } else {
+      append_error(ctxt, "Cannot resolve syscall list for architecture %#x\n",
+                   ctxt->target_arch);
+      return -1;
+    }
   }
 
   if (kafel_yyparse(ctxt, scanner) || ctxt->lexical_error) {
@@ -68,6 +77,10 @@ static int parse(struct kafel_ctxt* ctxt) {
 
 void set_target_arch(kafel_ctxt_t ctxt, uint32_t target_arch) {
   ctxt->target_arch = target_arch;
+}
+
+void set_use_companion_arch(kafel_ctxt_t ctxt, bool use_companion_arch) {
+  ctxt->use_companion_arch = use_companion_arch;
 }
 
 KAFEL_API void kafel_set_input_file(kafel_ctxt_t ctxt, FILE* file) {
