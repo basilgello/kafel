@@ -79,6 +79,10 @@ static int parse(struct kafel_ctxt* ctxt) {
   return 0;
 }
 
+void set_target_arch(kafel_ctxt_t ctxt, uint32_t target_arch) {
+  ctxt->target_arch = target_arch;
+}
+
 KAFEL_API void kafel_set_input_file(kafel_ctxt_t ctxt, FILE* file) {
   ASSERT(ctxt != NULL);
   ASSERT(file != NULL);
@@ -98,7 +102,20 @@ KAFEL_API void kafel_set_input_string(kafel_ctxt_t ctxt, const char* string) {
 KAFEL_API void kafel_set_target_arch(kafel_ctxt_t ctxt, uint32_t target_arch) {
   ASSERT(ctxt != NULL);
 
-  ctxt->target_arch = target_arch;
+  uint32_t target_archs[MAX_TARGET_ARCHS] = {target_arch, 0, 0, 0};
+  kafel_set_target_architectures(ctxt, target_archs, MAX_TARGET_ARCHS);
+}
+
+KAFEL_API void kafel_set_target_architectures(kafel_ctxt_t ctxt, uint32_t* target_archs, uint32_t size) {
+  ASSERT(ctxt != NULL);
+  ASSERT(target_archs != NULL);
+
+  size = size >= MAX_TARGET_ARCHS ? MAX_TARGET_ARCHS : size;
+
+  memset(ctxt->all_architectures, 0, MAX_TARGET_ARCHS * sizeof(uint32_t));
+  memcpy(ctxt->all_architectures, target_archs, size * sizeof(uint32_t));
+
+  ctxt->target_arch = ctxt->all_architectures[0];
 }
 
 KAFEL_API void kafel_add_include_search_path(kafel_ctxt_t ctxt,

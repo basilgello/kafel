@@ -30,6 +30,8 @@
 #include "policy.h"
 #include "syscall.h"
 
+#define MAX_TARGET_ARCHS 4
+
 struct kafel_constant {
   char* name;
   uint64_t value;
@@ -47,6 +49,7 @@ struct kafel_ctxt {
   int default_action;
   uint32_t target_arch;
   const struct syscall_list* syscalls;
+  uint32_t all_architectures[MAX_TARGET_ARCHS];
   struct {
     enum {
       INPUT_NONE,
