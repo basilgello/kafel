@@ -21,6 +21,8 @@
 #ifndef KAFEL_CONTEXT_H
 #define KAFEL_CONTEXT_H
 
+#include <linux/audit.h>
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>

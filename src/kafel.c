@@ -163,14 +163,74 @@ KAFEL_API int kafel_compile(kafel_ctxt_t ctxt, struct sock_fprog* prog) {
     return -EINVAL;
   }
 
-  kafel_ctxt_reset(ctxt);
+  struct sock_fprog target_programs[MAX_TARGET_ARCHS] = { 0 };
+  struct sock_fprog companion_programs[MAX_TARGET_ARCHS] = { 0 };
+  unsigned char i = 0;
+  int default_action = 0;
 
-  int rv = parse(ctxt);
-  if (rv) {
-    return rv;
+  for (i = 0; i < MAX_TARGET_ARCHS; i++) {
+    if (!ctxt->all_architectures[i]) continue;
+
+    kafel_ctxt_reset(ctxt);
+    set_target_arch(ctxt, ctxt->all_architectures[i]);
+    set_use_companion_arch(ctxt, false);
+
+    int rv = parse(ctxt);
+    if (rv) {
+      for (i = 0; i < MAX_TARGET_ARCHS; i++) {
+        free_sock_program(&target_programs[i]);
+        free_sock_program(&companion_programs[i]);
+      }
+
+      return rv;
+    }
+
+    default_action = ctxt->default_action;
+
+    rv = compile_policy(ctxt, &target_programs[i]);
+    if (rv) {
+      for (i = 0; i < MAX_TARGET_ARCHS; i++) {
+        free_sock_program(&target_programs[i]);
+        free_sock_program(&companion_programs[i]);
+      }
+
+      return rv;
+    }
+
+    if (!rv && target_programs[0].len == 1) {
+      *prog = target_programs[0];
+      return rv;
+    }
+
+    kafel_ctxt_reset(ctxt);
+    set_target_arch(ctxt, ctxt->all_architectures[i]);
+    set_use_companion_arch(ctxt, true);
+
+    rv = parse(ctxt);
+    if (rv) {
+      if (rv == -2) continue;
+
+      for (i = 0; i < MAX_TARGET_ARCHS; i++) {
+        free_sock_program(&target_programs[i]);
+        free_sock_program(&companion_programs[i]);
+      }
+
+      return rv;
+    }
+
+    rv = compile_policy(ctxt, &companion_programs[i]);
+    if (rv) {
+      for (i = 0; i < MAX_TARGET_ARCHS; i++) {
+        free_sock_program(&target_programs[i]);
+        free_sock_program(&companion_programs[i]);
+      }
+
+      return rv;
+    }
   }
 
-  return compile_policy(ctxt, prog);
+  return knit_policy(ctxt, target_programs, companion_programs,
+                     default_action, prog);
 }
 
 KAFEL_API int kafel_compile_file(FILE* file, struct sock_fprog* prog) {
