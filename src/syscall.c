@@ -52,15 +52,18 @@ const struct syscall_list syscall_lists[] = {
 #endif
 #ifdef AUDIT_ARCH_AARCH64
     SYSCALL_LIST(AUDIT_ARCH_AARCH64, aarch64),
+    SYSCALL_LIST(AUDIT_ARCH_ARM, arm),
 #endif
 #ifdef AUDIT_ARCH_X86_64
     SYSCALL_LIST(AUDIT_ARCH_X86_64, amd64),
+    SYSCALL_LIST(AUDIT_ARCH_I386, i386),
 #endif
 #ifdef AUDIT_ARCH_MIPS
     SYSCALL_LIST(AUDIT_ARCH_MIPS, mipso32),
 #endif
 #ifdef AUDIT_ARCH_MIPS64
     SYSCALL_LIST(AUDIT_ARCH_MIPS64, mips64),
+    SYSCALL_LIST(AUDIT_ARCH_MIPS, mipso32),
 #endif
 #ifdef AUDIT_ARCH_I386
     SYSCALL_LIST(AUDIT_ARCH_I386, i386),
