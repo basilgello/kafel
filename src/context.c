@@ -57,7 +57,9 @@ KAFEL_API kafel_ctxt_t kafel_ctxt_create(void) {
   includes_ctxt_init(&ctxt->includes_ctxt);
   TAILQ_INIT(&ctxt->policies);
   TAILQ_INIT(&ctxt->constants);
-  ctxt->target_arch = KAFEL_DEFAULT_TARGET_ARCH;
+  kafel_set_target_architectures(ctxt,
+    KAFEL_DEFAULT_TARGET_ARCH,
+    sizeof(KAFEL_DEFAULT_TARGET_ARCH) / sizeof(uint32_t));
   return ctxt;
 }
 
@@ -93,7 +95,9 @@ void kafel_ctxt_reset(kafel_ctxt_t ctxt) {
   }
   ctxt->default_action = 0;
   ctxt->lexical_error = false;
-  ctxt->syscalls = NULL;
+  kafel_set_target_architectures(ctxt,
+    KAFEL_DEFAULT_TARGET_ARCH,
+    sizeof(KAFEL_DEFAULT_TARGET_ARCH) / sizeof(uint32_t));
 }
 
 void kafel_ctxt_clean(kafel_ctxt_t ctxt) {
